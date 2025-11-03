@@ -1,0 +1,7 @@
+creation_rules:
+    # encrypt every .yaml file found 
+  - path_regex: ".*\\.ya?ml$"
+    # do not encrypt this values
+    unencrypted_regex: "^(apiVersion|metadata|kind|type)$"
+    # your public key
+    age: age163enufemh5l42qwa06jgveuse0m77chlu8cs9tqjwua0znvy9vsqxfcxn9
