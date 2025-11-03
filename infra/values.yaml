@@ -1,6 +1,6 @@
 configs:
   cm:
-    kustomize.buildOptions: "--enable-alpha-plugins --enable-exec"
+    kustomize.buildOptions: "--enable-exec"
 
 repoServer:
   env:
