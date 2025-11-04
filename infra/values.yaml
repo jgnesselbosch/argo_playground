@@ -1,6 +1,6 @@
 configs:
   cm:
-    kustomize.buildOptions: "--enable-exec"
+    kustomize.buildOptions: "--enable-alpha-plugins --enable-exec --load-restrictor LoadRestrictionsNone"
 
 repoServer:
   env:
@@ -8,6 +8,10 @@ repoServer:
       value: /.config
     - name: SOPS_AGE_KEY_FILE
       value: /.config/sops/age/keys.txt
+    - name: KUSTOMIZE_PLUGIN_HOME
+      value: /.config/kustomize/plugin
+    - name: KUSTOMIZE_ENABLE_EXEC
+      value: "true"
 
   volumes:
     - name: custom-tools
@@ -21,9 +25,17 @@ repoServer:
       image: viaductoss/ksops:v4.3.2
       command: ["/bin/sh", "-c"]
       args:
-        - echo "Installing KSOPS...";
+        - |
+          echo "Installing KSOPS...";
           cp /usr/local/bin/ksops /custom-tools/;
-          cp /usr/local/bin/kustomize /custom-tools/;
+          cp /usr/local/bin/kustomize /custom-tools/kustomize-ksops;
+          cat <<'EOF' > /custom-tools/kustomize
+          #!/bin/sh
+          export KUSTOMIZE_PLUGIN_HOME=$HOME/.config/kustomize/plugin
+          export KUSTOMIZE_ENABLE_ALPHA_COMMANDS=true
+          exec /usr/local/bin/kustomize-ksops "$@"
+          EOF
+          chmod +x /custom-tools/kustomize;
           echo "Done.";
       volumeMounts:
         - mountPath: /custom-tools
@@ -33,6 +45,9 @@ repoServer:
     - mountPath: /usr/local/bin/kustomize
       name: custom-tools
       subPath: kustomize
+    - mountPath: /usr/local/bin/kustomize-ksops
+      name: custom-tools
+      subPath: kustomize-ksops
     - mountPath: /usr/local/bin/ksops
       name: custom-tools
       subPath: ksops
